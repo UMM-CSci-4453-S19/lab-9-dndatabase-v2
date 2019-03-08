@@ -11,14 +11,16 @@ var connection = mysql.createConnection(credentials); // setup the connection
 connection.connect(function(err){if(err){console.log(error)}});
 
 app.use(express.static(__dirname + '/public'));
+
 app.get("/buttons",function(req,res){
-  var sql = 'SELECT * FROM test.till_buttons';
+  var sql = 'SELECT * FROM till_buttons';
   connection.query(sql,(function(res){return function(err,rows,fields){
      if(err){console.log("We have an error:");
              console.log(err);}
      res.send(rows);
   }})(res));
 });
+
 app.get("/click",function(req,res){
   var id = req.param('id');
   var sql = 'YOUR SQL HERE'
@@ -31,5 +33,10 @@ app.get("/click",function(req,res){
   }})(res));
 });
 // Your other API handlers go here!
+
+app.get("/list", function(req, res)
+{
+	
+}
 
 app.listen(port);

@@ -9,6 +9,7 @@ function ButtonCtrl($scope,buttonApi){
    $scope.isLoading=isLoading;
    $scope.refreshButtons=refreshButtons;
    $scope.buttonClick=buttonClick;
+   $scope.RJ = RJ;
 
    var loading = false;
 
@@ -33,9 +34,16 @@ function ButtonCtrl($scope,buttonApi){
      buttonApi.clickButton($event.target.id)
         .success(function(){})
         .error(function(){$scope.errorMessage="Unable click";});
+
+	
   }
   refreshButtons();  //make sure the buttons are loaded
-
+	
+	function RJ(event, button)
+	{
+		console.log(button.buttonID);
+		//http to get a url
+	}
 }
 
 function buttonApi($http,apiUrl){
