@@ -1,27 +1,74 @@
+mysql = require('mysql'),
+dbf = require('./gamemaster.dbf-setup.js');
+
 var express=require('express'),
-mysql=require('mysql'),
-credentials=require('./credentials.json'),
 app = express(),
 port = process.env.PORT || 1337;
 
-credentials.host='ids.morris.umn.edu'; //setup database credentials
-
-var connection = mysql.createConnection(credentials); // setup the connection
-
-connection.connect(function(err){if(err){console.log(error)}});
-
 app.use(express.static(__dirname + '/public'));
+app.listen(port);
 
-app.get("/buttons",function(req,res){
-  var sql = 'SELECT * FROM till_buttons';
-  connection.query(sql,(function(res){return function(err,rows,fields){
-     if(err){console.log("We have an error:");
-             console.log(err);}
-     res.send(rows);
-  }})(res));
-});
+// Lol commenting
+var getDBButtons = function(temp)
+{
+	var sql = "SELECT * FROM till_buttons";
+	return dbf.query(mysql.format(sql));	
+}
 
-app.get("/click",function(req,res){
+//RJ
+var processDBButtons = function(rows)
+{
+	app.get("/buttons",function(req, res)
+	{
+	  res.send(rows);
+	});
+}
+
+var getCurrentTransaction = function()
+{
+	var sql = "SELECT * FROM transaction";
+	return dbf.query(mysql.format(sql));
+}
+
+var processCurrentTransaction = function(rows)
+{
+	app.get("/list", function(req, res)
+	{
+		res.send(rows);
+	});
+}
+
+// On button click
+// query information about item
+// put information about item into transaction table
+// refresh transaction table
+// :)
+
+var getInventoryItemInfo = function(sql)
+{
+	return dbf.query(mysql.format(sql));
+}
+
+
+var onClick = function()
+{
+	app.get("/click", function(req, res)
+	{
+		//www.rj.site/click?id= 
+		var id = req.param('id');
+
+		var sql = "SELECT * FROM inventory WHERE inventory.id = " + id;
+
+		console.log(sql);
+		var result = getInventoryItemInfo(sql);
+
+		console.log(result);
+		res.send(result);
+		
+	});
+}
+
+/*app.get("/click",function(req,res){
   var id = req.param('id');
   var sql = 'YOUR SQL HERE'
   console.log("Attempting sql ->"+sql+"<-");
@@ -31,12 +78,19 @@ app.get("/click",function(req,res){
              console.log(err);}
      res.send(err); // Let the upstream guy know how it went
   }})(res));
-});
+});*/
+
+
 // Your other API handlers go here!
 
-app.get("/list", function(req, res)
-{
-	
-}
+onClick();
+getCurrentTransaction().then(processCurrentTransaction);
+getDBButtons().then(processDBButtons);
 
-app.listen(port);
+
+
+
+
+
+
+
