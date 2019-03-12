@@ -60,10 +60,14 @@ var onClick = function()
 		var sql = "SELECT * FROM inventory WHERE inventory.id = " + id;
 
 		console.log(sql);
-		var result = getInventoryItemInfo(sql);
-
-		console.log(result);
-		res.send(result);
+		var pResult = getInventoryItemInfo(sql);
+		var clickResolve = Promise.resolve(pResult);
+		clickResolve.then(function(val) {
+			console.log(JSON.stringify(val));
+			var result = JSON.stringify(val);
+			console.log(result);
+			res.send(result);
+		});
 		
 	});
 }
