@@ -9,16 +9,34 @@
 </head>
 <body ng-app="buttons">
 <div class="container-fluid">
-    <h1>Cash Register (with buttons)</h1>
-    <div id="buttons" ng-controller="buttonCtrl" >
-       <div ng-repeat="button in buttons">
-         <div style="position:absolute;left:{{button.x}}px;top:{{button.y}}px"><button id="{{button.buttonID}}" ng-click="buttonClick($event)">{{button.label}}</button></div>
-       </div>
-       <div style="position:fixed;height:50px;bottom:0px;left:0px;right:0px;margin-bottom:0px"} ng-show="errorMessage != ''">
-          <div class="col-sm-12">
-           <h3 class="text-danger">{{errorMessage}}</h3>
-         </div>
-       </div>
+    <h1>Merchant (with...buttons?!?!)</h1>
+    <div id="buttons" ng-controller="buttonCtrl" style='height: 80vh'>
+	<div style='height: 50vh'>
+	       <div ng-repeat="button in buttons">
+		 <div style="position:absolute;left:{{button.x}}px;top:{{button.y}}px"><button id="{{button.buttonID}}" ng-click="buttonClick($event)">{{button.label}}</button></div>
+	       </div>
+	       <div style="position:fixed;height:50px;bottom:0px;left:0px;right:0px;margin-bottom:0px"} ng-show="errorMessage != ''">
+		  <div class="col-sm-12">
+		   <h3 class="text-danger">{{errorMessage}}</h3>
+		 </div>
+	       </div>
+	</div>
+
+	<h3>Items</h3>
+	<div  style='background-color: tan; border-style: solid; border-width:2px'>
+		<table>
+			<tbody>
+				<tr ng-repeat="thing in transaction" ng-click='buttonRemove($event, thing.id)'>
+					<td style='width: 20vw'>Item: {{getButtonDesc(thing.id)}}     </td>
+					<td style='width: 20vw'>Price: ${{thing.price * thing.quantity}}     </td>
+					<td style='width: 20vw'>Quantity: {{thing.quantity}}     </td>
+				</tr>
+	
+			</tbody>
+		</table>
+	</div>
+
+
      </div>
 	 
 	 <!-- 	Create buttons here with ng-click="" that performs a querry to remove the ENTIRE entry from the DB, then refresh the list

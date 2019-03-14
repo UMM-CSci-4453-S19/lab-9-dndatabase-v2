@@ -5,10 +5,13 @@ angular.module('buttons',[])
 
 function ButtonCtrl($scope,buttonApi){
    $scope.buttons=[]; //Initially all was still
+   $scope.transaction=[];
    $scope.errorMessage='';
    $scope.isLoading=isLoading;
    $scope.refreshButtons=refreshButtons;
    $scope.buttonClick=buttonClick;
+   $scope.buttonRemove=buttonRemove;
+   $scope.getButtonDesc = getButtonDesc;
 
    var loading = false;
 
@@ -30,22 +33,37 @@ function ButtonCtrl($scope,buttonApi){
  }
 	function buttonClick($event)
 	{
-		//console.log($event.target.id);
     		$scope.errorMessage='';
      		buttonApi.clickButton($event.target.id)
-        	.success(function(){})
+        	.success(function(rows){	
+		$scope.transaction=rows;
+		})
         	.error(function(){$scope.errorMessage="Unable click";});
  	}
 	
-	function buttonRemove($event)
-	{
+	function buttonRemove($event, id)
+	{	
 		$scope.errorMessage='';
-     		buttonApi.removeButton($event.target.id)
-        	.success(function(){})
+     		buttonApi.removeButton(id)
+        	.success(function(rows){
+		console.log('got remove!!!')		
+		console.log(rows);			
+		transaction = rows;
+		})
         	.error(function(){$scope.errorMessage="Unable click";});
 	}
 
+	function getButtonDesc(id) {
+	  if(id > $scope.buttons.length){
+	    return '';		
+	      } else {
+		return $scope.buttons[id-1].label;
+	      }
+	}
+
   	refreshButtons();  //make sure the buttons are loaded
+	
+	
 }
 
 function buttonApi($http,apiUrl){
@@ -56,8 +74,8 @@ function buttonApi($http,apiUrl){
     },
     clickButton: function(id){
       var url = apiUrl+'/click?id='+id;
-//      console.log("Attempting with "+url);
-      return $http.get(url); // Easy enough to do this way
+      var result = $http.get(url); // Easy enough to do this way
+      return result;
     },
 	removeButton: function(id){
 		var url = apiUrl + '/remove?id='+id;

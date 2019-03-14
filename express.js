@@ -110,7 +110,7 @@ var onClick = function()
 	{
 		//www.rj.site/click?id= 
 		var id = req.param('id');
-
+		
 		var sql = "SELECT * FROM inventory WHERE inventory.id = " + id;
 
 		var pResult = DoQuery(sql);
@@ -139,7 +139,7 @@ var removeItem = function()
 		var id = req.param('id');
 		
 		var sql = "DELETE FROM transaction WHERE id = " + id;
-		
+		console.log('attempting to remove on the server');
 		var pResult = DoQuery(sql);
 		
 		var pResolve = Promise.resolve(pResult);
@@ -169,6 +169,7 @@ var removeItem = function()
 // Your other API handlers go here!
 
 onClick();
+removeItem();
 getCurrentTransaction().then(processCurrentTransaction);
 getDBButtons().then(processDBButtons);
 
