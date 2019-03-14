@@ -36,6 +36,14 @@ function ButtonCtrl($scope,buttonApi){
         	.success(function(){})
         	.error(function(){$scope.errorMessage="Unable click";});
  	}
+	
+	function buttonRemove($event)
+	{
+		$scope.errorMessage='';
+     		buttonApi.removeButton($event.target.id)
+        	.success(function(){})
+        	.error(function(){$scope.errorMessage="Unable click";});
+	}
 
   	refreshButtons();  //make sure the buttons are loaded
 }
@@ -50,7 +58,11 @@ function buttonApi($http,apiUrl){
       var url = apiUrl+'/click?id='+id;
 //      console.log("Attempting with "+url);
       return $http.get(url); // Easy enough to do this way
-    }
+    },
+	removeButton: function(id){
+		var url = apiUrl + '/delete?id='+id;
+		return $http.get(url);
+	}
  };
 }
 

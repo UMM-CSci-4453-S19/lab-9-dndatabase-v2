@@ -131,6 +131,27 @@ var onClick = function()
 	});
 }
 
+var removeItem = function()
+{
+	//Takes an ?id = , which may or may not be helpful?..
+	app.get("/remove", function(req, res)
+	{
+		var id = req.param('id');
+		
+		var sql = "DELETE FROM transaction WHERE id = " + id;
+		
+		var pResult = DoQuery(sql);
+		
+		var pResolve = Promise.resolve(pResult);
+		
+		pResolve.then(refreshTransactionTable).then(function(rows)
+		{
+			console.log(rows);
+			res.send(rows);
+		});;
+		
+	});
+}
 
 /*app.get("/click",function(req,res){
   var id = req.param('id');
