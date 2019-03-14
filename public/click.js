@@ -60,7 +60,7 @@ function buttonApi($http,apiUrl){
       return $http.get(url); // Easy enough to do this way
     },
 	removeButton: function(id){
-		var url = apiUrl + '/delete?id='+id;
+		var url = apiUrl + '/remove?id='+id;
 		return $http.get(url);
 	}
  };
