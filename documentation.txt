@@ -10,3 +10,9 @@ dndatabase
 API:
 *Not quite sure what needs to be documented here, but here we go*
 We have functions for communicating between the database and client. They range from accessing a mySQL database to queries about getting rows from tables/updating another table with rows to doing specific things during specific actions like clicking a button for adding or removing a speicfic item from the transaction list. .  
+
+/list
+
+
+/add?id=...
+

@@ -1,6 +1,5 @@
 mysql = require('mysql'),
 dbf = require('./gamemaster.dbf-setup.js');
-
 var express=require('express'),
 app = express(),
 port = process.env.PORT || 1337;
@@ -29,14 +28,14 @@ var sendTransaction = function()
 {
     app.get("/transaction", function(req, res)
     {
-		// Promise.resolve will wait until getCurrentTransaction() finishes...
+	// Promise.resolve will wait until getCurrentTransaction() finishes...
     	var pRes = Promise.resolve(getCurrentTransaction());
 		
-		// Then once it's finished, send the values to the client
+	// Then once it's finished, send the values to the client
         pRes.then( function (val)
-		{
+	{
             res.send(val);
-		});
+	});
     });
 }
 
@@ -56,12 +55,6 @@ var processCurrentTransaction = function(rows)
 	});
 }
 
-// On Button Click...
-// Get information on the price of an item based on ID
-// Get information about the item ID in the context of transactions (If there already an ID? If so, how many items are in it)
-// Attempt to insert into the tranaction table (If ID already exists, do something differently)
-// Send the updated transaction table back to Client
-
 //Shortcut function so that we don't have to type dbf.query(mysql.format(sql)) each time
 var DoQuery = function(sql)
 {
@@ -75,53 +68,19 @@ var getPriceFromID = function(id)
 	return DoQuery(sql);
 }
 
-// A function to parse information reguarding an item from a previous SQL query, and cases handling existing in the transaction list
-var doesItemExistInTransaction = function(rows)
-{
-	// Get of the object from a previous SQL query, which is rows
-	var id = rows[0].id;
-	
-	// Try to get information about the item from transaction
-	var sql = "SELECT * FROM transaction WHERE id = " + id;
-	var result = Promise.resolve(DoQuery(sql));
-
-	// Parse information about
-	result.then(function(val)
-	{
-		if(val[0] == null)
-		{
-			//Item does not exist in transactions
-			return addToTransaction(rows);
-			
-		}
-		else
-		{
-			return updateTransactionTable(rows);
-		}
-	});
-}
-
 var addToTransaction = function(rows)
 {
 	var id = rows[0].id;
-    console.log('addToTransaction id: ' + rows[0].id);
 	var price = rows[0].price;
-	
-	var sql = "INSERT INTO transaction VALUES (" + id + ", 1, " + price + ")";
-	return Promise.resolve(DoQuery(sql));
-}
 
-var updateTransactionTable = function(rows)
-{
-	var id = rows[0].id;
+	var sql = "INSERT INTO transaction VALUES (" + id + ", 1, " + price + ") ON DUPLICATE KEY UPDATE quantity = quantity + 1;";
 
-	var sql = "UPDATE transaction SET quantity = quantity + 1 WHERE id = " + id;
 	return Promise.resolve(DoQuery(sql));
 }
 
 var refreshTransactionTable = function(rows)
 {
-	sql = "SELECT * FROM transaction";
+	var sql = "SELECT * FROM transaction";
 	return Promise.resolve(DoQuery(sql));
 }
 
@@ -139,10 +98,8 @@ var onClick = function()
 		var clickResolve = Promise.resolve(pResult);
 		clickResolve.then(function(val)
 		{
-			console.log(val[0].id);
-			getPriceFromID(val[0].id).then(doesItemExistInTransaction).then(refreshTransactionTable).then(function(rows)
+			getPriceFromID(val[0].id).then(addToTransaction).then(refreshTransactionTable).then(function(rows)
 			{
-				console.log(rows);
 				res.send(rows);
 			});
 
