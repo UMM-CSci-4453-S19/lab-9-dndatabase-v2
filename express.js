@@ -23,6 +23,16 @@ var processDBButtons = function(rows)
 	  res.send(rows);
 	});
 }
+var sendTransaction = function()
+{
+    app.get("/transaction",function(req, res)
+    {
+    	var pRes = Promise.resolve(getCurrentTransaction());
+        pRes.then( function (val) {
+            res.send(val);
+		});
+    });
+}
 
 var getCurrentTransaction = function()
 {
@@ -61,7 +71,6 @@ var getPriceFromID = function(id)
 var doesItemExistInTransaction = function(rows)
 {
 	var id = rows[0].id;
-	
 	var sql = "SELECT * FROM transaction WHERE id = " + id;
 	var result = Promise.resolve(DoQuery(sql));
 
@@ -83,6 +92,7 @@ var doesItemExistInTransaction = function(rows)
 var addToTransaction = function(rows)
 {
 	var id = rows[0].id;
+    console.log('addToTransaction id: ' + rows[0].id);
 	var price = rows[0].price;
 	
 	var sql = "INSERT INTO transaction VALUES (" + id + ", 1, " + price + ")";
@@ -92,12 +102,12 @@ var addToTransaction = function(rows)
 var updateTransactionTable = function(rows)
 {
 	var id = rows[0].id;
-	
+
 	var sql = "UPDATE transaction SET quantity = quantity + 1 WHERE id = " + id;
 	return Promise.resolve(DoQuery(sql));
 }
 
-var refreshTransactionTable = function()
+var refreshTransactionTable = function(rows)
 {
 	sql = "SELECT * FROM transaction";
 	return Promise.resolve(DoQuery(sql));
@@ -115,17 +125,15 @@ var onClick = function()
 
 		var pResult = DoQuery(sql);
 		var clickResolve = Promise.resolve(pResult);
-		clickResolve.then(function(val) 
+		clickResolve.then(function(val)
 		{
-			//console.log(val[0].item);
-			//val = JSON.stringify(val);
-			
-			var result = getPriceFromID(val[0].id).then(doesItemExistInTransaction).then(refreshTransactionTable).then(function(rows)
+			console.log(val[0].id);
+			getPriceFromID(val[0].id).then(doesItemExistInTransaction).then(refreshTransactionTable).then(function(rows)
 			{
 				console.log(rows);
 				res.send(rows);
 			});
-			
+
 		});
 		
 	});
@@ -139,37 +147,21 @@ var removeItem = function()
 		var id = req.param('id');
 		
 		var sql = "DELETE FROM transaction WHERE id = " + id;
-		console.log('attempting to remove on the server');
 		var pResult = DoQuery(sql);
 		
 		var pResolve = Promise.resolve(pResult);
 		
 		pResolve.then(refreshTransactionTable).then(function(rows)
 		{
-			console.log(rows);
 			res.send(rows);
 		});;
 		
 	});
 }
 
-/*app.get("/click",function(req,res){
-  var id = req.param('id');
-  var sql = 'YOUR SQL HERE'
-  console.log("Attempting sql ->"+sql+"<-");
-
-  connection.query(sql,(function(res){return function(err,rows,fields){
-     if(err){console.log("We have an insertion error:");
-             console.log(err);}
-     res.send(err); // Let the upstream guy know how it went
-  }})(res));
-});*/
-
-
-// Your other API handlers go here!
-
 onClick();
 removeItem();
+sendTransaction();
 getCurrentTransaction().then(processCurrentTransaction);
 getDBButtons().then(processDBButtons);
 

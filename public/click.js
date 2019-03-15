@@ -1,9 +1,10 @@
 angular.module('buttons',[])
   .controller('buttonCtrl',ButtonCtrl)
   .factory('buttonApi',buttonApi)
+    .factory('transactionApi',transactionApi)
   .constant('apiUrl','http://localhost:1337'); // CHANGED for the lab 2017!
 
-function ButtonCtrl($scope,buttonApi){
+function ButtonCtrl($scope,buttonApi,transactionApi){
    $scope.buttons=[]; //Initially all was still
    $scope.transaction=[];
    $scope.errorMessage='';
@@ -12,6 +13,8 @@ function ButtonCtrl($scope,buttonApi){
    $scope.buttonClick=buttonClick;
    $scope.buttonRemove=buttonRemove;
    $scope.getButtonDesc = getButtonDesc;
+   $scope.getTotal = getTotal;
+   $scope.total = []
 
    var loading = false;
 
@@ -37,31 +40,53 @@ function ButtonCtrl($scope,buttonApi){
      		buttonApi.clickButton($event.target.id)
         	.success(function(rows){	
 		$scope.transaction=rows;
+		$scope.getTotal();
 		})
         	.error(function(){$scope.errorMessage="Unable click";});
  	}
-	
+
+ 	function getTotal() {
+        $scope.total = 0;
+        $scope.transaction.forEach(function(item) {
+            $scope.total += item.price * item.quantity;
+        });
+    }
+
 	function buttonRemove($event, id)
 	{	
 		$scope.errorMessage='';
      		buttonApi.removeButton(id)
         	.success(function(rows){
-		console.log('got remove!!!')		
-		console.log(rows);			
-		transaction = rows;
+		$scope.transaction = rows;
+		$scope.getTotal();
 		})
-        	.error(function(){$scope.errorMessage="Unable click";});
+        	.error(function(){$scope.errorMessage="Unable to Remove";});
 	}
 
 	function getButtonDesc(id) {
-	  if(id > $scope.buttons.length){
+	  if(!$scope.buttons[id-1]){
 	    return '';		
 	      } else {
-		return $scope.buttons[id-1].label;
+	      return $scope.buttons[id-1].label;
 	      }
 	}
+	function getTransactionTableData() {
+        loading=true;
+        $scope.errorMessage='';
+        transactionApi.getTransaction()
+            .success(function(rows){
+                $scope.transaction=rows;
+                loading=false;
+                $scope.getTotal();
+            })
+            .error(function () {
+                $scope.errorMessage="Unable to load Transaction Data";
+                loading=false;
+            });
+    }
 
   	refreshButtons();  //make sure the buttons are loaded
+    getTransactionTableData();
 	
 	
 }
@@ -82,5 +107,14 @@ function buttonApi($http,apiUrl){
 		return $http.get(url);
 	}
  };
+}
+
+function transactionApi($http,apiUrl){
+    return{
+        getTransaction: function(){
+            var url = apiUrl + '/transaction';
+            return $http.get(url);
+        }
+    };
 }
 

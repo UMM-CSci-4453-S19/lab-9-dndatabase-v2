@@ -26,15 +26,15 @@
 	<div  style='background-color: tan; border-style: solid; border-width:2px'>
 		<table>
 			<tbody>
-				<tr ng-repeat="thing in transaction" ng-click='buttonRemove($event, thing.id)'>
-					<td style='width: 20vw'>Item: {{getButtonDesc(thing.id)}}     </td>
-					<td style='width: 20vw'>Price: ${{thing.price * thing.quantity}}     </td>
-					<td style='width: 20vw'>Quantity: {{thing.quantity}}     </td>
+				<tr ng-repeat="item in transaction" ng-click='buttonRemove($event, item.id)'>
+					<td style='width: 20vw'>Item: {{getButtonDesc(item.id)}}     </td>
+					<td style='width: 20vw'>Price: ${{item.price * item.quantity}}     </td>
+					<td style='width: 20vw'>Quantity: {{item.quantity}}     </td>
 				</tr>
-	
 			</tbody>
 		</table>
 	</div>
+		<h3>Total: {{total}}</h3>
 
 
      </div>
