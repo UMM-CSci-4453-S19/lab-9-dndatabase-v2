@@ -8,14 +8,14 @@ port = process.env.PORT || 1337;
 app.use(express.static(__dirname + '/public'));
 app.listen(port);
 
-// Lol commenting
+// Performs an SQL query and returns the result in json
 var getDBButtons = function(temp)
 {
 	var sql = "SELECT * FROM till_buttons";
 	return dbf.query(mysql.format(sql));	
 }
 
-//RJ
+// Takes in json from an previous SQL query and returns it to the client
 var processDBButtons = function(rows)
 {
 	app.get("/buttons",function(req, res)
@@ -23,23 +23,31 @@ var processDBButtons = function(rows)
 	  res.send(rows);
 	});
 }
+
+// Sends, to the client, the current items in the transaction 
 var sendTransaction = function()
 {
-    app.get("/transaction",function(req, res)
+    app.get("/transaction", function(req, res)
     {
+		// Promise.resolve will wait until getCurrentTransaction() finishes...
     	var pRes = Promise.resolve(getCurrentTransaction());
-        pRes.then( function (val) {
+		
+		// Then once it's finished, send the values to the client
+        pRes.then( function (val)
+		{
             res.send(val);
 		});
     });
 }
 
+// Gets the current items in the transactions and returns it as json
 var getCurrentTransaction = function()
 {
 	var sql = "SELECT * FROM transaction";
 	return dbf.query(mysql.format(sql));
 }
 
+// Sends the current items in the transaction back to the client
 var processCurrentTransaction = function(rows)
 {
 	app.get("/list", function(req, res)
@@ -54,26 +62,30 @@ var processCurrentTransaction = function(rows)
 // Attempt to insert into the tranaction table (If ID already exists, do something differently)
 // Send the updated transaction table back to Client
 
+//Shortcut function so that we don't have to type dbf.query(mysql.format(sql)) each time
 var DoQuery = function(sql)
 {
 	return dbf.query(mysql.format(sql));
 }
 
+// Performs an SQL query to get all information about an item with id
 var getPriceFromID = function(id)
 {
 	var sql = "SELECT * FROM prices WHERE id = " + id
 	return DoQuery(sql);
-
-	//Know: ID and Price
-	//Missing: Quantity
 }
 
+// A function to parse information reguarding an item from a previous SQL query, and cases handling existing in the transaction list
 var doesItemExistInTransaction = function(rows)
 {
+	// Get of the object from a previous SQL query, which is rows
 	var id = rows[0].id;
+	
+	// Try to get information about the item from transaction
 	var sql = "SELECT * FROM transaction WHERE id = " + id;
 	var result = Promise.resolve(DoQuery(sql));
 
+	// Parse information about
 	result.then(function(val)
 	{
 		if(val[0] == null)
