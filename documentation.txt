@@ -12,17 +12,12 @@ API:
 We have functions for communicating between the database and client. They range from accessing a mySQL database to queries about getting rows from tables/updating another table with rows to doing specific things during specific actions like clicking a button for adding or removing a speicfic item from the transaction list. .  
 
 
-/buttons returns json to the client
+/buttons queries the database and gets all the buttons in the till_buttons table, returning it to the client as json
 
-/transaction takens current item in transaction as json and send that json to the client
+/transaction queries the database to get all of the items in the transaction table, and returns it to the client as json
 
-/click?id= takens in an id through req.params and finds all values in the id column of inventory table that match the id given.
+/list queries the database to get all of the items in the transaction table, and returns it to the client as json
 
-/list sends the current items  in the transaction transaction, an array containing item name, price and amount,  back to the client.
+/click takes in one parameter through use of ?id=... and uses it to query the database to get the price of an item based off the id, adds that item to a transaction table, refreshes the transaction table, and returns the current transaction table to the client as json
 
-/remove?id= takens an id using req.params and deletes from the transaction table where the id passed to /remove matches the id in the
-  transaction table.
-  
-
-
-
+/remove takes in one parameter through use of ?id=... and uses to to query the database to delete entries from the transaction table
