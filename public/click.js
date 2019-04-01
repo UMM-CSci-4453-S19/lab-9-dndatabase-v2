@@ -4,6 +4,8 @@ angular.module('buttons',[])
     .factory('transactionApi',transactionApi)
   .constant('apiUrl','http://localhost:1337'); // CHANGED for the lab 2017!
 
+
+
 function ButtonCtrl($scope,buttonApi,transactionApi){
    $scope.buttons=[]; //Initially all was still
    $scope.transaction=[];
@@ -15,6 +17,9 @@ function ButtonCtrl($scope,buttonApi,transactionApi){
    $scope.getButtonDesc = getButtonDesc;
    $scope.getTotal = getTotal;
    $scope.total = []
+
+   $scope.logged_in = true;
+   $scope.logIn = logIn;
 
    var loading = false;
 
@@ -38,12 +43,28 @@ function ButtonCtrl($scope,buttonApi,transactionApi){
 	{
     		$scope.errorMessage='';
      		buttonApi.clickButton($event.target.id)
-        	.success(function(rows){	
+        	.success(function(rows){
 		$scope.transaction=rows;
 		$scope.getTotal();
 		})
         	.error(function(){$scope.errorMessage="Unable click";});
  	}
+
+  function logIn(uname, pword)
+  {
+    console.log("Trying to log in...");
+    buttonApi.logInUser(uname, pword).success(function(rows)
+    {
+      if(rows)
+      {
+        $scope.logged_in=rows
+      }
+      else
+      {
+        $scope.logged_in=rows
+      }
+    });
+  }
 
  	function getTotal() {
         $scope.total = 0;
@@ -53,7 +74,7 @@ function ButtonCtrl($scope,buttonApi,transactionApi){
     }
 
 	function buttonRemove($event, id)
-	{	
+	{
 		$scope.errorMessage='';
      		buttonApi.removeButton(id)
         	.success(function(rows){
@@ -65,7 +86,7 @@ function ButtonCtrl($scope,buttonApi,transactionApi){
 
 	function getButtonDesc(id) {
 	  if(!$scope.buttons[id-1]){
-	    return '';		
+	    return '';
 	      } else {
 	      return $scope.buttons[id-1].label;
 	      }
@@ -87,8 +108,8 @@ function ButtonCtrl($scope,buttonApi,transactionApi){
 
   	refreshButtons();  //make sure the buttons are loaded
     getTransactionTableData();
-	
-	
+
+
 }
 
 function buttonApi($http,apiUrl){
@@ -105,7 +126,13 @@ function buttonApi($http,apiUrl){
 	removeButton: function(id){
 		var url = apiUrl + '/remove?id='+id;
 		return $http.get(url);
-	}
+	},
+
+  logInUser: function(uname, pword)
+  {
+    var url = apiUrl + '/login?uname=' + uname + '&pword=' +pword;
+    return $http.get(url);
+  }
  };
 }
 
@@ -117,4 +144,3 @@ function transactionApi($http,apiUrl){
         }
     };
 }
-

@@ -11,7 +11,7 @@ app.listen(port);
 var getDBButtons = function(temp)
 {
 	var sql = "SELECT * FROM till_buttons";
-	return dbf.query(mysql.format(sql));	
+	return dbf.query(mysql.format(sql));
 }
 
 // Takes in json from an previous SQL query and returns it to the client
@@ -23,14 +23,14 @@ var processDBButtons = function(rows)
 	});
 }
 
-// Sends, to the client, the current items in the transaction 
+// Sends, to the client, the current items in the transaction
 var sendTransaction = function()
 {
     app.get("/transaction", function(req, res)
     {
 		// Promise.resolve will wait until getCurrentTransaction() finishes...
     	var pRes = Promise.resolve(getCurrentTransaction());
-		
+
 		// Then once it's finished...
         pRes.then( function (val)
 		{
@@ -96,11 +96,11 @@ var onClick = function()
 	{
 		// Get an id from a parameter in the request, which looks like https://www.rj.site/click?id=...
 		var id = req.param('id');
-		
+
 		// Performs an SQL query getting everything from the inventory table with an id of id
 		var sql = "SELECT * FROM inventory WHERE inventory.id = " + id;
 		var pResult = DoQuery(sql);
-		
+
 		// Once the query is done...
 		var clickResolve = Promise.resolve(pResult);
 		clickResolve.then(function(val)
@@ -113,7 +113,7 @@ var onClick = function()
 			});
 
 		});
-		
+
 	});
 }
 
@@ -124,11 +124,11 @@ var removeItem = function()
 	{
 		// Get an id from a parameter in the request, which looks like https://www.rj.site/click?id=...
 		var id = req.param('id');
-		
+
 		// Performs an SQL query to remove a row from transaction with a given id
 		var sql = "DELETE FROM transaction WHERE id = " + id;
 		var pResult = DoQuery(sql);
-		
+
 		// When the query finishes...
 		var pResolve = Promise.resolve(pResult);
 		pResolve.then(refreshTransactionTable).then(function(rows)
@@ -136,7 +136,33 @@ var removeItem = function()
 			//... send the result back to the client
 			res.send(rows);
 		});;
-		
+
+	});
+}
+
+var tryLogIn = function()
+{
+	app.get("/login", function(req, res)
+	{
+		var uname = req.param('uname');
+		var pword = req.param('pword');
+
+		var sql = "SELECT * FROM employeeLogin WHERE username = " + uname + " AND password = " + pword;
+		var pResult = DoQuery(sql);
+
+		var pResolve = Promise.resolve(pResult);
+		pResolve.then(function(rows)
+		{
+			//If the row count is one, we found a successful username + password pair
+				if(rows[0] != "")
+				{
+					res.send(true);
+				}
+				else
+				{
+					res.send(false);
+				}
+		});
 	});
 }
 
@@ -146,11 +172,3 @@ removeItem();
 sendTransaction();
 getCurrentTransaction().then(processCurrentTransaction);
 getDBButtons().then(processDBButtons);
-
-
-
-
-
-
-
-
