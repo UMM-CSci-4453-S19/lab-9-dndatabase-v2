@@ -11,7 +11,7 @@
 <div class="container-fluid">
     <h1>Merchant (with...buttons?!?!)</h1>
 
-    <div ng-if="$scope.logged_in==true">
+    <div ng-if="!logged_in">
     <div id="buttons" ng-controller="buttonCtrl" style='height: 80vh'>
 	     <div style='height: 50vh'>
 	       <div ng-repeat="button in buttons">
@@ -23,6 +23,8 @@
 		 </div>
 	       </div>
 	</div>
+        <button style="background-color: green;" ng-click="finishOrder()">SALE</button>
+        <button style="background-color: red;" ng-click="cancelOrder()">VOID</button>
 
 	<h3>Items</h3>
 	<div  style='background-color: tan; border-style: solid; border-width:2px'>
@@ -40,11 +42,13 @@
   </div>
   </div>
 
-  <div ng-if"$scope.logged_in==false">
-    <input type="text" ng-model="uname" placeholder="Username"></input>
-    <input type="password" ng-model="pword" placeholder="Password"></input>
-    <button id=login ng-click="logIn(uname,pword)">Login</button>
+  <div ng-if="logged_in">
+    <input type="text" ng-model="uname" placeholder="Username" size="20" maxlength="20">
+    <input type="password" ng-model="pword" placeholder="Password" size="16" maxlength="16">
+    <button id='loginButton' ng-click="testOutput()">Login</button>
   </div>
+
+	<!--ng-click="logIn($event,uname,pword)"-->
 
 	 <!-- 	Create buttons here with ng-click="" that performs a querry to remove the ENTIRE entry from the DB, then refresh the list
 			It might be worth it to also make the /list thing as well, rather than hard coding the refresh after each opperation -->
