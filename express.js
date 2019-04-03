@@ -166,9 +166,22 @@ var tryLogIn = function()
 	});
 }
 
+var voidTransaction = function() {
+	app.get('/voidOrder', function (req, res) {
+        console.log('void transaction request');
+		var sql = 'DELETE FROM transaction';
+		var pResult = DoQuery(sql);
+		var pResolve = Promise.resolve(pResult);
+		pResolve.then(function() {
+			res.send('voided');
+        });
+	});
+}
+
 //Enable our 'listeners'
 onClick();
 removeItem();
 sendTransaction();
 getCurrentTransaction().then(processCurrentTransaction);
 getDBButtons().then(processDBButtons);
+voidTransaction();
