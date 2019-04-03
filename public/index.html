@@ -1,57 +1,61 @@
 <!doctype html>
 <html>
 <head lang="en">
-  <meta charset="utf-8">
-  <title>Cash Register</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.4/angular.min.js"></script>
-  <script src="click.js"></script>
+    <meta charset="utf-8">
+    <title>Cash Register</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.4/angular.min.js"></script>
+    <script src="click.js"></script>
 </head>
 <body ng-app="buttons">
-<div class="container-fluid">
+<div class="container-fluid" ng-controller="buttonCtrl">
     <h1>Merchant (with...buttons?!?!)</h1>
 
-    <div ng-if="!logged_in">
-    <div id="buttons" ng-controller="buttonCtrl" style='height: 80vh'>
-	     <div style='height: 50vh'>
-	       <div ng-repeat="button in buttons">
-		 <div style="position:absolute;left:{{button.x}}px;top:{{button.y}}px"><button id="{{button.buttonID}}" ng-click="buttonClick($event)">{{button.label}}</button></div>
-	       </div>
-	       <div style="position:fixed;height:50px;bottom:0px;left:0px;right:0px;margin-bottom:0px"} ng-show="errorMessage != ''">
-		  <div class="col-sm-12">
-		   <h3 class="text-danger">{{errorMessage}}</h3>
-		 </div>
-	       </div>
-	</div>
-        <button style="background-color: green;" ng-click="finishOrder()">SALE</button>
-        <button style="background-color: red;" ng-click="cancelOrder()">VOID</button>
+    <div ng-hide="logged_in">
+        <div id="buttons"  style='height: 80vh'>
+            <div style='height: 50vh'>
+                <div ng-repeat="button in buttons">
+                    <div style="position:absolute;left:{{button.x}}px;top:{{button.y}}px">
+                        <button id="{{button.buttonID}}" ng-click="buttonClick($event)">{{button.label}}</button>
+                    </div>
+                </div>
+                <div style="position:fixed;height:50px;bottom:0px;left:0px;right:0px;margin-bottom:0px" }
+                     ng-show="errorMessage != ''">
+                    <div class="col-sm-12">
+                        <h3 class="text-danger">{{errorMessage}}</h3>
+                    </div>
+                </div>
+            </div>
+            <button style="background-color: green;" ng-click="finishOrder()">SALE</button>
+            <button style="background-color: red;" ng-click="cancelOrder()">VOID</button>
+            <button ng-click="logOut()">Logout</button>
 
-	<h3>Items</h3>
-	<div  style='background-color: tan; border-style: solid; border-width:2px'>
-		<table>
-			<tbody>
-				<tr ng-repeat="item in transaction" ng-click='buttonRemove($event, item.id)'>
-					<td style='width: 20vw'>Item: {{getButtonDesc(item.id)}}     </td>
-					<td style='width: 20vw'>Price: ${{item.price * item.quantity}}     </td>
-					<td style='width: 20vw'>Quantity: {{item.quantity}}     </td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-		<h3>Total: {{total}}</h3>
-  </div>
-  </div>
+            <h3>Items</h3>
+            <div style='background-color: tan; border-style: solid; border-width:2px'>
+                <table>
+                    <tbody>
+                    <tr ng-repeat="item in transaction" ng-click='buttonRemove($event, item.id)'>
+                        <td style='width: 20vw'>Item: {{getButtonDesc(item.id)}}</td>
+                        <td style='width: 20vw'>Price: ${{item.price * item.quantity}}</td>
+                        <td style='width: 20vw'>Quantity: {{item.quantity}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>Total: {{total}}</h3>
+        </div>
+    </div>
 
-  <div ng-if="logged_in">
-    <input type="text" ng-model="uname" placeholder="Username" size="20" maxlength="20">
-    <input type="password" ng-model="pword" placeholder="Password" size="16" maxlength="16">
-    <button id='loginButton' ng-click="testOutput()">Login</button>
-  </div>
+    <div ng-hide="!logged_in">
+        <input type="text" ng-model="uname" placeholder="Username" size="20" maxlength="20">
+        <input type="password" ng-model="pword" placeholder="Password" size="16" maxlength="16">
+        <button ng-click="logIn(uname, pword)">Login</button>
+    </div>
 
-	<!--ng-click="logIn($event,uname,pword)"-->
+    <!--ng-click="logIn($event,uname,pword)"-->
 
-	 <!-- 	Create buttons here with ng-click="" that performs a querry to remove the ENTIRE entry from the DB, then refresh the list
-			It might be worth it to also make the /list thing as well, rather than hard coding the refresh after each opperation -->
+    <!-- 	Create buttons here with ng-click="" that performs a querry to remove the ENTIRE entry from the DB, then refresh the list
+           It might be worth it to also make the /list thing as well, rather than hard coding the refresh after each opperation -->
 </div>
 </body>
 </html>

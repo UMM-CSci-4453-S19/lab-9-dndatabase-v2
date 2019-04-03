@@ -140,30 +140,32 @@ var removeItem = function()
 	});
 }
 
+app.get("/login", function(req, res)
+{
+    var uname = req.param('uname');
+    var pword = req.param('pword');
+
+    var sql = "SELECT * FROM employeeLogin WHERE username = '" + uname + "' AND password = '" + pword + "';";
+    var pResult = DoQuery(sql);
+
+    var pResolve = Promise.resolve(pResult);
+    pResolve.then(function(rows)
+    {
+        //If the result is not null we found a valid login
+		if(!rows[0])
+		{
+			res.send(true);
+		}
+		else
+		{
+			res.send(false);
+		}
+    });
+});
+
 var tryLogIn = function()
 {
-	app.get("/login", function(req, res)
-	{
-		var uname = req.param('uname');
-		var pword = req.param('pword');
 
-		var sql = "SELECT * FROM employeeLogin WHERE username = " + uname + " AND password = " + pword;
-		var pResult = DoQuery(sql);
-
-		var pResolve = Promise.resolve(pResult);
-		pResolve.then(function(rows)
-		{
-			//If the row count is one, we found a successful username + password pair
-				if(rows[0] != "")
-				{
-					res.send(true);
-				}
-				else
-				{
-					res.send(false);
-				}
-		});
-	});
 }
 
 var voidTransaction = function() {
@@ -180,6 +182,7 @@ var voidTransaction = function() {
 
 //Enable our 'listeners'
 onClick();
+tryLogIn();
 removeItem();
 sendTransaction();
 getCurrentTransaction().then(processCurrentTransaction);
