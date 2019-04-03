@@ -7,7 +7,8 @@ angular.module('buttons',[])
 
 
 function ButtonCtrl($scope,buttonApi,transactionApi){
-   $scope.buttons=[]; //Initially all was still
+    $scope.testOutput = testOutput;
+    $scope.buttons=[]; //Initially all was still
    $scope.transaction=[];
    $scope.errorMessage='';
    $scope.isLoading=isLoading;
@@ -16,12 +17,33 @@ function ButtonCtrl($scope,buttonApi,transactionApi){
    $scope.buttonRemove=buttonRemove;
    $scope.getButtonDesc = getButtonDesc;
    $scope.getTotal = getTotal;
-   $scope.total = []
+   $scope.total = [];
+   $scope.cancelOrder = cancelOrder;
+   $scope.finishOrder = finishOrder;
 
    $scope.logged_in = true;
    $scope.logIn = logIn;
+   $scope.uname = '';
+   $scope.pword = '';
 
    var loading = false;
+
+   function testOutput(){
+       console.log('something happened!!!');
+   }
+
+   function cancelOrder() {
+       $scope.errorMessage='';
+       buttonApi.voidOrder()
+           .success(function(rows){
+               getTransactionTableData();
+           })
+           .error(function(){$scope.errorMessage="Unable click";});
+   }
+
+   function finishOrder() {
+       console.log('order complete!!!');
+   }
 
    function isLoading(){
     return loading;
@@ -57,11 +79,13 @@ function ButtonCtrl($scope,buttonApi,transactionApi){
     {
       if(rows)
       {
-        $scope.logged_in=rows
+        console.log(rows);
+          $scope.logged_in=rows
       }
       else
       {
-        $scope.logged_in=rows
+          console.log('no success!!!');
+          $scope.logged_in=rows
       }
     });
   }
@@ -132,6 +156,10 @@ function buttonApi($http,apiUrl){
   {
     var url = apiUrl + '/login?uname=' + uname + '&pword=' +pword;
     return $http.get(url);
+  },
+  voidOrder: function() {
+	    var url = apiUrl + '/voidOrder';
+	    return $http.get(url);
   }
  };
 }
