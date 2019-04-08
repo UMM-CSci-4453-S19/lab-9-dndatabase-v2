@@ -133,7 +133,10 @@ function ButtonCtrl($scope, buttonApi, transactionApi) {
 
     function finishOrder(user)
     {
-        buttonApi.saleOrder(user)
+        $scope.getTotal();
+
+        console.log("Total is: " + $scope.total);
+        buttonApi.saleOrder(user, $scope.total)
             .success(function (rows)
             {
                 getTransactionTableData();
@@ -151,7 +154,8 @@ function ButtonCtrl($scope, buttonApi, transactionApi) {
 
 function buttonApi($http, apiUrl) {
     return {
-        getButtons: function () {
+        getButtons: function ()
+        {
             var url = apiUrl + '/buttons';
             return $http.get(url);
         },
@@ -177,8 +181,8 @@ function buttonApi($http, apiUrl) {
             return $http.get(url);
         },
 
-        saleOrder: function (user) {
-            var url = apiUrl + '/sale?user=' + user;
+        saleOrder: function (user, total) {
+            var url = apiUrl + '/sale?user=' + user + '&total=' + total;
             return $http.get(url);
         }
     };

@@ -77,7 +77,7 @@ var addToTransaction = function(rows)
 
 	// This line attempts to insert in whatever value and price of an item into the table
 	// If it already exists (ON DUPLICATE KEY UPDATE), instead of adding it, it simply updates that row by adding 1 to the quantity
-	var sql = "INSERT INTO transaction VALUES (" + id + ", 1, " + price + ") ON DUPLICATE KEY UPDATE quantity = quantity + 1;";
+	var sql = "INSERT INTO transaction (id, quantity, price, timestamp) VALUES (" + id + ", 1, " + price + ", (SELECT NOW())) ON DUPLICATE KEY UPDATE quantity = quantity + 1, `timestamp` = `timestamp`";
 
 	return Promise.resolve(DoQuery(sql));
 }
@@ -175,8 +175,13 @@ app.get('/voidOrder', function (req, res)
 app.get('/sale', function (req, res)
 {
 	var user = req.param('user');
+	var total = req.param('total');
+	var timeStampDiff = "(SELECT TIMEDIFF((SELECT `timestamp` FROM transaction ORDER BY `timestamp` ASC LIMIT 1), (SELECT NOW())))";
 
-	var sql = "INSERT INTO archive (id, quantity, price, transactionID, user) SELECT id, quantity, price, (SELECT (MAX(transactionID) + 1) FROM archive) as `maxid`, '" + user + "' FROM transaction";
+	var sql = "INSERT INTO archive (id, quantity, price, transactionID, user, startTime, stopTime, duration, total) " +
+		"SELECT id, quantity, price, (SELECT (MAX(transactionID) + 1) FROM archive) as `maxid`, '" + user + "', (SELECT `timestamp` FROM transaction ORDER BY `timestamp` ASC LIMIT 1), (SELECT NOW()), " + timeStampDiff + ", " + total + " FROM transaction";
+
+	console.log(sql);
 	var pResult = DoQuery(sql);
 	var pResolve = Promise.resolve(pResult);
 	pResolve.then(function()
@@ -186,6 +191,11 @@ app.get('/sale', function (req, res)
             res.send('sale');
 		});
 	});
+});
+
+app.get('/recipe', function (req, res)
+{
+
 });
 
 //Enable our 'listeners'
