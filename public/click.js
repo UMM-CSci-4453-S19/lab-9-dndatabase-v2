@@ -19,7 +19,6 @@ function ButtonCtrl($scope, buttonApi, transactionApi) {
     $scope.total = [];
     $scope.cancelOrder = cancelOrder;
     $scope.finishOrder = finishOrder;
-    $scope.logOut = logOut;
 
     $scope.logged_in = true;
     $scope.logIn = logIn;
@@ -41,10 +40,6 @@ function ButtonCtrl($scope, buttonApi, transactionApi) {
             .error(function () {
                 $scope.errorMessage = "Unable click";
             });
-    }
-
-    function finishOrder() {
-        console.log('order complete!!!');
     }
 
     function logOut() {
@@ -136,6 +131,18 @@ function ButtonCtrl($scope, buttonApi, transactionApi) {
             });
     }
 
+    function finishOrder(user)
+    {
+        buttonApi.saleOrder(user)
+            .success(function (rows)
+            {
+                getTransactionTableData();
+            })
+            .error(function () {
+                $scope.errorMessage = "Unable to make sale";
+            });
+    }
+
     refreshButtons();  //make sure the buttons are loaded
     getTransactionTableData();
 
@@ -148,11 +155,13 @@ function buttonApi($http, apiUrl) {
             var url = apiUrl + '/buttons';
             return $http.get(url);
         },
+
         clickButton: function (id) {
             var url = apiUrl + '/click?id=' + id;
             var result = $http.get(url); // Easy enough to do this way
             return result;
         },
+
         removeButton: function (id) {
             var url = apiUrl + '/remove?id=' + id;
             return $http.get(url);
@@ -162,8 +171,14 @@ function buttonApi($http, apiUrl) {
             var url = apiUrl + '/login?uname=' + uname + '&pword=' + pword;
             return $http.get(url);
         },
+
         voidOrder: function () {
             var url = apiUrl + '/voidOrder';
+            return $http.get(url);
+        },
+
+        saleOrder: function (user) {
+            var url = apiUrl + '/sale?user=' + user;
             return $http.get(url);
         }
     };

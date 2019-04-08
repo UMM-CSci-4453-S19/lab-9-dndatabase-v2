@@ -89,55 +89,56 @@ var refreshTransactionTable = function(rows)
 	return Promise.resolve(DoQuery(sql));
 }
 
-// A function that handles every time a button is clicked
-var onClick = function()
+app.get("/click", function(req, res)
 {
-	app.get("/click", function(req, res)
+	// Get an id from a parameter in the request, which looks like https://www.rj.site/click?id=...
+	var id = req.param('id');
+
+	// Performs an SQL query getting everything from the inventory table with an id of id
+	var sql = "SELECT * FROM inventory WHERE inventory.id = " + id;
+	var pResult = DoQuery(sql);
+
+	// Once the query is done...
+	var clickResolve = Promise.resolve(pResult);
+	clickResolve.then(function(val)
 	{
-		// Get an id from a parameter in the request, which looks like https://www.rj.site/click?id=...
-		var id = req.param('id');
-
-		// Performs an SQL query getting everything from the inventory table with an id of id
-		var sql = "SELECT * FROM inventory WHERE inventory.id = " + id;
-		var pResult = DoQuery(sql);
-
-		// Once the query is done...
-		var clickResolve = Promise.resolve(pResult);
-		clickResolve.then(function(val)
+		// Perform a series of functions, one after the other, waiting for the previous to finish before moving on
+		getPriceFromID(val[0].id).then(addToTransaction).then(refreshTransactionTable).then(function(rows)
 		{
-			// Perform a series of functions, one after the other, waiting for the previous to finish before moving on
-			getPriceFromID(val[0].id).then(addToTransaction).then(refreshTransactionTable).then(function(rows)
-			{
-				// Finally send back the result of everything (the last being the updated transaction table) to the client
-				res.send(rows);
-			});
-
+			// Finally send back the result of everything (the last being the updated transaction table) to the client
+			res.send(rows);
 		});
 
 	});
-}
+
+});
 
 // As its name implies, it removes ALL of an item from the transaction table
-var removeItem = function()
+app.get("/remove", function(req, res)
 {
-	app.get("/remove", function(req, res)
+	// Get an id from a parameter in the request, which looks like https://www.rj.site/click?id=...
+	var id = req.param('id');
+
+	// Performs an SQL query to remove a row from transaction with a given id
+	var sql = "DELETE FROM transaction WHERE id = " + id;
+	var pResult = DoQuery(sql);
+
+	// When the query finishes...
+	var pResolve = Promise.resolve(pResult);
+	pResolve.then(refreshTransactionTable).then(function(rows)
 	{
-		// Get an id from a parameter in the request, which looks like https://www.rj.site/click?id=...
-		var id = req.param('id');
+		//... send the result back to the client
+		res.send(rows);
+	});;
 
-		// Performs an SQL query to remove a row from transaction with a given id
-		var sql = "DELETE FROM transaction WHERE id = " + id;
-		var pResult = DoQuery(sql);
+});
 
-		// When the query finishes...
-		var pResolve = Promise.resolve(pResult);
-		pResolve.then(refreshTransactionTable).then(function(rows)
-		{
-			//... send the result back to the client
-			res.send(rows);
-		});;
-
-	});
+var VoidSale = function()
+{
+    var sql = 'DELETE FROM transaction';
+    var pResult = DoQuery(sql);
+    var pResolve = Promise.resolve(pResult);
+    return pResolve;
 }
 
 app.get("/login", function(req, res)
@@ -163,28 +164,31 @@ app.get("/login", function(req, res)
     });
 });
 
-var tryLogIn = function()
+app.get('/voidOrder', function (req, res)
 {
+	VoidSale().then(function()
+	{
+    	res.send('voided');
+	});;
+});
 
-}
+app.get('/sale', function (req, res)
+{
+	var user = req.param('user');
 
-var voidTransaction = function() {
-	app.get('/voidOrder', function (req, res) {
-        console.log('void transaction request');
-		var sql = 'DELETE FROM transaction';
-		var pResult = DoQuery(sql);
-		var pResolve = Promise.resolve(pResult);
-		pResolve.then(function() {
-			res.send('voided');
-        });
+	var sql = "INSERT INTO archive (id, quantity, price, transactionID, user) SELECT id, quantity, price, (SELECT (MAX(transactionID) + 1) FROM archive) as `maxid`, '" + user + "' FROM transaction";
+	var pResult = DoQuery(sql);
+	var pResolve = Promise.resolve(pResult);
+	pResolve.then(function()
+	{
+		VoidSale().then(function()
+		{
+            res.send('sale');
+		});
 	});
-}
+});
 
 //Enable our 'listeners'
-onClick();
-tryLogIn();
-removeItem();
 sendTransaction();
 getCurrentTransaction().then(processCurrentTransaction);
 getDBButtons().then(processDBButtons);
-voidTransaction();
