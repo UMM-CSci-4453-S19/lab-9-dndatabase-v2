@@ -140,6 +140,20 @@ function ButtonCtrl($scope, buttonApi, transactionApi) {
             .success(function (rows)
             {
                 getTransactionTableData();
+
+                var items = "";
+
+                for(var i = 0; i < rows.length; i++)
+                {
+                    items += "Item: " + rows[i].notes + " Quantity: " + rows[i].quantity + " Price: " + rows[i].price + "\n";
+                }
+
+                alert("Your CSCI friendly receipt is:\nHappy-to-exist Staff Member: " +
+                    rows[0].user + "\nTime: " +
+                    rows[0].duration + " \nTransactionID: " +
+                    rows[0].transactionID + "\n" + items
+
+                );
             })
             .error(function () {
                 $scope.errorMessage = "Unable to make sale";

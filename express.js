@@ -176,19 +176,27 @@ app.get('/sale', function (req, res)
 {
 	var user = req.param('user');
 	var total = req.param('total');
-	var timeStampDiff = "(SELECT TIMEDIFF((SELECT `timestamp` FROM transaction ORDER BY `timestamp` ASC LIMIT 1), (SELECT NOW())))";
+	var timeStampDiff = "(SELECT TIMEDIFF((SELECT NOW()), (SELECT `timestamp` FROM transaction ORDER BY `timestamp` ASC LIMIT 1)))";
 
 	var sql = "INSERT INTO archive (id, quantity, price, transactionID, user, startTime, stopTime, duration, total) " +
 		"SELECT id, quantity, price, (SELECT (MAX(transactionID) + 1) FROM archive) as `maxid`, '" + user + "', (SELECT `timestamp` FROM transaction ORDER BY `timestamp` ASC LIMIT 1), (SELECT NOW()), " + timeStampDiff + ", " + total + " FROM transaction";
 
-	console.log(sql);
 	var pResult = DoQuery(sql);
 	var pResolve = Promise.resolve(pResult);
 	pResolve.then(function()
 	{
 		VoidSale().then(function()
 		{
-            res.send('sale');
+			var sql = "SELECT archive.id, quantity, archive.price, transactionID, user, duration, total, prices.notes FROM archive INNER JOIN prices ON archive.id=prices.id WHERE transactionID=(SELECT MAX(transactionID) from archive)";
+
+			var pResult = DoQuery(sql);
+			var pResolve = Promise.resolve(pResult);
+
+			pResolve.then(function(rows)
+			{
+				res.send(rows)
+			})
+
 		});
 	});
 });
