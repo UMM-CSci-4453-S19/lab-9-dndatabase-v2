@@ -135,20 +135,32 @@ app.get("/remove", function(req, res)
 
 var VoidSale = function()
 {
+	// Could use TRUNCATE as well, but both function the same
     var sql = 'DELETE FROM transaction';
+
+    // Do the Query
     var pResult = DoQuery(sql);
+
+    // Wait for it to finish
     var pResolve = Promise.resolve(pResult);
+
+    // Return
     return pResolve;
 }
 
 app.get("/login", function(req, res)
 {
+	// Get username and password from the URL
     var uname = req.param('uname');
     var pword = req.param('pword');
 
+    // Generate a statement from the username and password
     var sql = "SELECT * FROM employeeLogin WHERE username = '" + uname + "' AND password = '" + pword + "';";
+
+    // Wait for it to finish
     var pResult = DoQuery(sql);
 
+    // Once it's done, see if we found any rows. If we did, then it's a valid login.
     var pResolve = Promise.resolve(pResult);
     pResolve.then(function(rows)
     {
@@ -159,6 +171,7 @@ app.get("/login", function(req, res)
 		}
 		else
 		{
+			// If nothing was found it's invalid
 			res.send(false);
 		}
     });
@@ -166,32 +179,43 @@ app.get("/login", function(req, res)
 
 app.get('/voidOrder', function (req, res)
 {
+	// Call void sale then...
 	VoidSale().then(function()
 	{
+		// ...send the result
     	res.send('voided');
 	});;
 });
 
 app.get('/sale', function (req, res)
 {
+	// Get the current user and the total sale price from the url
 	var user = req.param('user');
 	var total = req.param('total');
+
+	// This SQL is added into our 'main' sql statement. This specific line gets the difference in time from the beginning of the transaction, and the end
 	var timeStampDiff = "(SELECT TIMEDIFF((SELECT NOW()), (SELECT `timestamp` FROM transaction ORDER BY `timestamp` ASC LIMIT 1)))";
 
+	// Construct SQL statement. It's quiet lengthy, but each the main focus is to get all relevant fields of information from the transaction table, as well as generating new fields while the sql is happening (time is done here)
 	var sql = "INSERT INTO archive (id, quantity, price, transactionID, user, startTime, stopTime, duration, total) " +
 		"SELECT id, quantity, price, (SELECT (MAX(transactionID) + 1) FROM archive) as `maxid`, '" + user + "', (SELECT `timestamp` FROM transaction ORDER BY `timestamp` ASC LIMIT 1), (SELECT NOW()), " + timeStampDiff + ", " + total + " FROM transaction";
 
+	// Run the query, and wait for it to finish.
 	var pResult = DoQuery(sql);
 	var pResolve = Promise.resolve(pResult);
 	pResolve.then(function()
 	{
+		// Once we have the results from the query, void the transaction...
 		VoidSale().then(function()
 		{
+			// ...then construct another sql statement to get the important bits for a receipt (item name, how many, the cashier, total, etc)
 			var sql = "SELECT archive.id, quantity, archive.price, transactionID, user, duration, total, prices.notes FROM archive INNER JOIN prices ON archive.id=prices.id WHERE transactionID=(SELECT MAX(transactionID) from archive)";
 
+			// Do the query
 			var pResult = DoQuery(sql);
 			var pResolve = Promise.resolve(pResult);
 
+			// Once it's done, send back a json 'recipe' to the client.
 			pResolve.then(function(rows)
 			{
 				res.send(rows)
@@ -199,11 +223,6 @@ app.get('/sale', function (req, res)
 
 		});
 	});
-});
-
-app.get('/recipe', function (req, res)
-{
-
 });
 
 //Enable our 'listeners'

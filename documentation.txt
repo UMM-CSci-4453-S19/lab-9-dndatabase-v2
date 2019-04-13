@@ -21,3 +21,9 @@ We have functions for communicating between the database and client. They range 
 /click takes in one parameter through use of ?id=... and uses it to query the database to get the price of an item based off the id, adds that item to a transaction table, refreshes the transaction table, and returns the current transaction table to the client as json
 
 /remove takes in one parameter through use of ?id=... and uses to to query the database to delete entries from the transaction table
+
+/login takes in two parameters through the use of ?uname=... and &pname=... and uses them to 'log in' to the server, which will display the till buttons on success. Returns true or false on success or fail.
+
+/voidOrder takes no parameters and instructs the database to truncate the current transaction table. Returns 'voided' on success.
+
+/sale takes in two parameters through the use of ?user=... and &total=... and uses them to complete missing details regarding to completing a transaction, and archiving it. Once it has done that it will return json with a 'receipt' for the purchase
